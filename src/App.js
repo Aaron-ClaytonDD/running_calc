@@ -1,6 +1,23 @@
 import './App.css';
 import React from 'react';
 
+import { datadogRum } from '@datadog/browser-rum';
+
+datadogRum.init({
+    applicationId: 'e2ada0ce-8b27-4f45-a926-9eb00c36619f',
+    clientToken: 'pubd1a717a2974a481df404a89ffecedfb7',
+    // `site` refers to the Datadog site parameter of your organization
+    // see https://docs.datadoghq.com/getting_started/site/
+    site: 'datadoghq.com',
+    service: 'running-calculator',
+    env: 'prod',
+    // Specify a version number to identify the deployed version of your application in Datadog
+    // version: '1.0.0',
+    sessionSampleRate: 100,
+    sessionReplaySampleRate: 100,
+    defaultPrivacyLevel: 'allow',
+});
+
 
 
 // Constants
