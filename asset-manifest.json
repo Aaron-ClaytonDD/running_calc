@@ -1,15 +1,19 @@
 {
   "files": {
     "main.css": "/running_calc/static/css/main.f855e6bc.css",
-    "main.js": "/running_calc/static/js/main.5a665356.js",
-    "static/js/453.1f83a9db.chunk.js": "/running_calc/static/js/453.1f83a9db.chunk.js",
+    "main.js": "/running_calc/static/js/main.affc8851.js",
+    "recorder.js": "/running_calc/static/js/recorder.9626af9b.chunk.js",
+    "profiler.js": "/running_calc/static/js/profiler.743b402a.chunk.js",
+    "static/js/453.f9de9c3f.chunk.js": "/running_calc/static/js/453.f9de9c3f.chunk.js",
     "index.html": "/running_calc/index.html",
     "main.f855e6bc.css.map": "/running_calc/static/css/main.f855e6bc.css.map",
-    "main.5a665356.js.map": "/running_calc/static/js/main.5a665356.js.map",
-    "453.1f83a9db.chunk.js.map": "/running_calc/static/js/453.1f83a9db.chunk.js.map"
+    "main.affc8851.js.map": "/running_calc/static/js/main.affc8851.js.map",
+    "recorder.9626af9b.chunk.js.map": "/running_calc/static/js/recorder.9626af9b.chunk.js.map",
+    "profiler.743b402a.chunk.js.map": "/running_calc/static/js/profiler.743b402a.chunk.js.map",
+    "453.f9de9c3f.chunk.js.map": "/running_calc/static/js/453.f9de9c3f.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f855e6bc.css",
-    "static/js/main.5a665356.js"
+    "static/js/main.affc8851.js"
   ]
 }
