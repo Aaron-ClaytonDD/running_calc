@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/runningcalc/static/css/main.f855e6bc.css",
+    "main.js": "/runningcalc/static/js/main.3a075f01.js",
+    "static/js/453.1f83a9db.chunk.js": "/runningcalc/static/js/453.1f83a9db.chunk.js",
+    "index.html": "/runningcalc/index.html",
+    "main.f855e6bc.css.map": "/runningcalc/static/css/main.f855e6bc.css.map",
+    "main.3a075f01.js.map": "/runningcalc/static/js/main.3a075f01.js.map",
+    "453.1f83a9db.chunk.js.map": "/runningcalc/static/js/453.1f83a9db.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f855e6bc.css",
+    "static/js/main.3a075f01.js"
+  ]
+}
