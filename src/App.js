@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import React from 'react';
 
@@ -84,9 +83,26 @@ function App() {
     <div className="App" style={{
       backgroundColor: '#f5f5f5',
       minHeight: '100vh',
-      padding: '20px'
+      padding: '0'
     }}>
-      <h1 style={{color: '#2c3e50'}}>Race Pace Calculator</h1>
+      <div style={{
+        background: 'linear-gradient(135deg, #2980b9, #2c3e50)',
+        padding: '15px 20px',
+        marginBottom: '30px',
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+      }}>
+        <h1 style={{
+          color: 'white',
+          margin: '0',
+          fontSize: '2em',
+          textAlign: 'center',
+          textTransform: 'uppercase',
+          letterSpacing: '2px',
+          textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+        }}>
+          🏃 Race Pace Calculator 🏃‍♀️
+        </h1>
+      </div>
       
       <div className="calculator-container" style={{
         backgroundColor: 'white',
