@@ -3,6 +3,150 @@ import React from 'react';
 
 
 
+// Constants
+const DISTANCES = {
+  km: {
+    marathon: 42.2,
+    half: 21.1,
+    '10k': 10,
+    '5k': 5
+  },
+  mile: {
+    marathon: 26.2,
+    half: 13.1,
+    '10k': 6.2137,
+    '5k': 3.10686
+  }
+};
+
+// Components
+const Header = () => (
+  <div style={{
+    background: 'linear-gradient(135deg, #2980b9, #2c3e50)',
+    padding: '15px 10px',
+    marginBottom: '20px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+    width: '100%'
+  }}>
+    <h1 style={{
+      color: 'white',
+      margin: '0',
+      fontSize: 'clamp(1.5em, 4vw, 2em)',
+      textAlign: 'center',
+      textTransform: 'uppercase',
+      letterSpacing: '2px',
+      textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+      padding: '0 10px'
+    }}>
+      🏃 Race Pace Calculator! 🏃‍♀️
+    </h1>
+  </div>
+);
+
+const TimeInput = ({ label, value, onChange, min = "0", max }) => (
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
+  }}>
+    <label style={{marginBottom: '5px', fontSize: '14px'}}>{label}</label>
+    <input
+      type="number"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onFocus={(e) => e.target.value === '0' && (e.target.value = '')}
+      onBlur={(e) => e.target.value === '' && (e.target.value = '0')}
+      min={min}
+      max={max}
+      className="time-input"
+      style={{
+        padding: '8px',
+        width: '100%',
+        borderRadius: '4px',
+        border: '1px solid #bdc3c7',
+        fontSize: '16px'
+      }}
+    />
+  </div>
+);
+
+const SpeedTable = ({ unit, speeds }) => (
+  <table className="speeds-table" style={{
+    width: '100%',
+    margin: '10px auto',
+    borderCollapse: 'collapse',
+    backgroundColor: '#fff',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+    minWidth: '280px'
+  }}>
+    <thead>
+      <tr style={{backgroundColor: '#34495e', color: 'white'}}>
+        <th style={{padding: '12px', fontSize: '14px'}}>Alternative paces</th>
+        <th style={{padding: '12px', fontSize: '14px'}}>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      {unit === 'km' ? (
+        <tr style={{borderBottom: '1px solid #ecf0f1'}}>
+          <td style={{padding: '12px', fontSize: '14px'}}>Minutes per Mile</td>
+          <td style={{padding: '12px', fontSize: '14px'}}>{speeds.minPerMile}/mile</td>
+        </tr>
+      ) : (
+        <tr style={{borderBottom: '1px solid #ecf0f1'}}>
+          <td style={{padding: '12px', fontSize: '14px'}}>Minutes per Kilometer</td>
+          <td style={{padding: '12px', fontSize: '14px'}}>{speeds.minPerKm}/km</td>
+        </tr>
+      )}
+      <tr style={{borderBottom: '1px solid #ecf0f1'}}>
+        <td style={{padding: '12px', fontSize: '14px'}}>Miles per Hour</td>
+        <td style={{padding: '12px', fontSize: '14px'}}>{speeds.mph} mph</td>
+      </tr>
+      <tr>
+        <td style={{padding: '12px', fontSize: '14px'}}>Kilometers per Hour</td>
+        <td style={{padding: '12px', fontSize: '14px'}}>{speeds.kph} km/h</td>
+      </tr>
+    </tbody>
+  </table>
+);
+
+const SplitRow = ({ index, split, unit, totalSplits }) => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '8px',
+    backgroundColor: 'white',
+    borderRadius: '4px',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+  }}>
+    <div style={{
+      minWidth: '120px',
+      fontSize: '14px',
+      color: '#666'
+    }}>{unit === 'km' ? `Kilometer ${index + 1}` : `Mile ${index + 1}`}</div>
+    <div style={{
+      flex: 1,
+      height: '24px',
+      backgroundColor: '#f0f0f0',
+      borderRadius: '4px',
+      overflow: 'hidden'
+    }}>
+      <div style={{
+        width: `${(split.seconds / Math.max(...totalSplits.map(s => s.seconds))) * 100}%`,
+        height: '100%',
+        backgroundColor: index < totalSplits.length/2 ? '#3498db' : '#2ecc71',
+        transition: 'width 0.3s ease'
+      }}></div>
+    </div>
+    <div style={{
+      minWidth: '70px',
+      fontSize: '14px',
+      fontWeight: 'bold',
+      textAlign: 'right'
+    }}>{split.split}</div>
+  </div>
+);
+
 function App() {
   const [hours, setHours] = React.useState('0');
   const [minutes, setMinutes] = React.useState('0');
@@ -10,94 +154,44 @@ function App() {
   const [pace, setPace] = React.useState(null);
   const [speeds, setSpeeds] = React.useState(null);
   const [splits, setSplits] = React.useState(null);
-  const [unit, setUnit] = React.useState('km'); // Default to kilometers
-  const [distance, setDistance] = React.useState('marathon'); // Default to marathon
-  const [splitType, setSplitType] = React.useState('steady'); // Default to steady splits
-  const [splitsVisible, setSplitsVisible] = React.useState(true); // For collapsible splits
+  const [unit, setUnit] = React.useState('km');
+  const [distance, setDistance] = React.useState('marathon');
+  const [splitType, setSplitType] = React.useState('steady');
+  const [splitsVisible, setSplitsVisible] = React.useState(false);
 
-  const handleFocus = (e) => {
-    if (e.target.value === '0') {
-      e.target.value = '';
-    }
-  };
-
-  const handleBlur = (e) => {
-    if (e.target.value === '') {
-      e.target.value = '0';
-    }
-  };
-
-  const calculatePace = () => {
-    // Validate that all fields have values
-    if (!hours || !minutes || !seconds) {
-      alert('Please fill in all time fields');
-      return;
-    }
-
-    // Convert all inputs to seconds
-    const totalSeconds = (parseInt(hours) * 3600) + 
-                        (parseInt(minutes) * 60) + 
-                        parseInt(seconds);
-    
-    // Set distance based on selected race and unit
-    let raceDistance;
-    if (unit === 'km') {
-      raceDistance = {
-        'marathon': 42.2,
-        'half': 21.1,
-        '10k': 10,
-        '5k': 5
-      }[distance];
-    } else {
-      raceDistance = {
-        'marathon': 26.2,
-        'half': 13.1,
-        '10k': 6.2137,
-        '5k': 3.10686
-      }[distance];
-    }
-    
-    // Calculate seconds per unit
-    const secondsPerUnit = totalSeconds / raceDistance;
-    
-    // Convert back to minutes and seconds
-    const paceMinutes = Math.floor(secondsPerUnit / 60);
-    const paceSeconds = Math.round(secondsPerUnit % 60);
-    
-    setPace(`${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}/${unit}`);
-
-    // Generate splits based on split type
+  const calculateSplits = (secondsPerUnit, raceDistance, splitType) => {
     const splitsList = [];
     const numSplits = Math.ceil(raceDistance);
     const halfwayPoint = Math.floor(numSplits / 2);
 
     if (splitType === 'steady') {
-      for (let i = 1; i <= numSplits; i++) {
-        splitsList.push({
+      return Array(numSplits).fill().map(() => {
+        const paceMinutes = Math.floor(secondsPerUnit / 60);
+        const paceSeconds = Math.round(secondsPerUnit % 60);
+        return {
           split: `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}`,
           seconds: secondsPerUnit
-        });
-      }
-    } else if (splitType === 'negative') {
-      // Calculate adjusted paces for negative splits (max 6 seconds difference)
-      const adjustment = Math.min(6, secondsPerUnit * 0.05); // 5% or 6 seconds, whichever is smaller
-      const firstHalfSeconds = secondsPerUnit + adjustment;
-      const secondHalfSeconds = secondsPerUnit - adjustment;
-
-      for (let i = 1; i <= numSplits; i++) {
-        const splitSeconds = i <= halfwayPoint ? firstHalfSeconds : secondHalfSeconds;
-        const splitMinutes = Math.floor(splitSeconds / 60);
-        const splitSecs = Math.round(splitSeconds % 60);
-        splitsList.push({
-          split: `${splitMinutes}:${splitSecs.toString().padStart(2, '0')}`,
-          seconds: splitSeconds
-        });
-      }
+        };
+      });
     }
 
-    setSplits(splitsList);
+    // Calculate negative splits
+    const adjustment = Math.min(6, secondsPerUnit * 0.05);
+    const firstHalfSeconds = secondsPerUnit + adjustment;
+    const secondHalfSeconds = secondsPerUnit - adjustment;
 
-    // Calculate additional speeds
+    return Array(numSplits).fill().map((_, i) => {
+      const splitSeconds = i < halfwayPoint ? firstHalfSeconds : secondHalfSeconds;
+      const splitMinutes = Math.floor(splitSeconds / 60);
+      const splitSecs = Math.round(splitSeconds % 60);
+      return {
+        split: `${splitMinutes}:${splitSecs.toString().padStart(2, '0')}`,
+        seconds: splitSeconds
+      };
+    });
+  };
+
+  const calculateSpeeds = (secondsPerUnit, unit) => {
     if (unit === 'km') {
       const kmPerHour = (3600 / secondsPerUnit).toFixed(2);
       const secondsPerMile = secondsPerUnit * 1.60934;
@@ -105,27 +199,47 @@ function App() {
       const paceSecondsPerMile = Math.round(secondsPerMile % 60);
       const milesPerHour = (3600 / secondsPerMile).toFixed(2);
 
-      setSpeeds({
+      return {
         minPerMile: `${paceMinutesPerMile}:${paceSecondsPerMile.toString().padStart(2, '0')}`,
         mph: milesPerHour,
         kph: kmPerHour
-      });
-    } else {
-      const milesPerHour = (3600 / secondsPerUnit).toFixed(2);
-      const secondsPerKm = secondsPerUnit / 1.60934;
-      const paceMinutesPerKm = Math.floor(secondsPerKm / 60);
-      const paceSecondsPerKm = Math.round(secondsPerKm % 60);
-      const kmPerHour = (milesPerHour * 1.60934).toFixed(2);
-
-      setSpeeds({
-        minPerKm: `${paceMinutesPerKm}:${paceSecondsPerKm.toString().padStart(2, '0')}`,
-        mph: milesPerHour,
-        kph: kmPerHour
-      });
+      };
     }
+
+    const milesPerHour = (3600 / secondsPerUnit).toFixed(2);
+    const secondsPerKm = secondsPerUnit / 1.60934;
+    const paceMinutesPerKm = Math.floor(secondsPerKm / 60);
+    const paceSecondsPerKm = Math.round(secondsPerKm % 60);
+    const kmPerHour = (milesPerHour * 1.60934).toFixed(2);
+
+    return {
+      minPerKm: `${paceMinutesPerKm}:${paceSecondsPerKm.toString().padStart(2, '0')}`,
+      mph: milesPerHour,
+      kph: kmPerHour
+    };
   };
 
-  // Add effect to recalculate when inputs change
+  const calculatePace = () => {
+    if (!hours || !minutes || !seconds) {
+      alert('Please fill in all time fields');
+      return;
+    }
+
+    const totalSeconds = (parseInt(hours) * 3600) + 
+                        (parseInt(minutes) * 60) + 
+                        parseInt(seconds);
+    
+    const raceDistance = DISTANCES[unit][distance];
+    const secondsPerUnit = totalSeconds / raceDistance;
+    
+    const paceMinutes = Math.floor(secondsPerUnit / 60);
+    const paceSeconds = Math.round(secondsPerUnit % 60);
+    
+    setPace(`${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}/${unit}`);
+    setSplits(calculateSplits(secondsPerUnit, raceDistance, splitType));
+    setSpeeds(calculateSpeeds(secondsPerUnit, unit));
+  };
+
   React.useEffect(() => {
     if (hours !== '0' || minutes !== '0' || seconds !== '0') {
       calculatePace();
@@ -141,26 +255,7 @@ function App() {
       maxWidth: '100vw',
       overflowX: 'hidden'
     }}>
-      <div style={{
-        background: 'linear-gradient(135deg, #2980b9, #2c3e50)',
-        padding: '15px 10px',
-        marginBottom: '20px',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-        width: '100%'
-      }}>
-        <h1 style={{
-          color: 'white',
-          margin: '0',
-          fontSize: 'clamp(1.5em, 4vw, 2em)',
-          textAlign: 'center',
-          textTransform: 'uppercase',
-          letterSpacing: '2px',
-          textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-          padding: '0 10px'
-        }}>
-          🏃 Race Pace Calculator! 🏃‍♀️
-        </h1>
-      </div>
+      <Header />
       
       <div className="calculator-container" style={{
         backgroundColor: 'white',
@@ -176,6 +271,7 @@ function App() {
           fontSize: 'clamp(1.2em, 3vw, 1.5em)',
           textAlign: 'center'
         }}>Race Distance</h2>
+        
         <div style={{
           marginBottom: '20px',
           display: 'flex',
@@ -231,80 +327,10 @@ function App() {
           maxWidth: '100%',
           padding: '0 10px'
         }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}>
-            <label style={{marginBottom: '5px', fontSize: '14px'}}>Hours</label>
-            <input
-              type="number"
-              value={hours}
-              onChange={(e) => setHours(e.target.value)}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              placeholder="Hours"
-              min="0"
-              className="time-input"
-              style={{
-                padding: '8px',
-                width: '100%',
-                borderRadius: '4px',
-                border: '1px solid #bdc3c7',
-                fontSize: '16px'
-              }}
-            />
-          </div>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}>
-            <label style={{marginBottom: '5px', fontSize: '14px'}}>Minutes</label>
-            <input
-              type="number" 
-              value={minutes}
-              onChange={(e) => setMinutes(e.target.value)}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              placeholder="Minutes"
-              min="0"
-              max="59"
-              className="time-input"
-              style={{
-                padding: '8px',
-                width: '100%',
-                borderRadius: '4px',
-                border: '1px solid #bdc3c7',
-                fontSize: '16px'
-              }}
-            />
-          </div>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}>
-            <label style={{marginBottom: '5px', fontSize: '14px'}}>Seconds</label>
-            <input
-              type="number"
-              value={seconds}
-              onChange={(e) => setSeconds(e.target.value)}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              placeholder="Seconds"
-              min="0"
-              max="59"
-              className="time-input"
-              style={{
-                padding: '8px',
-                width: '100%',
-                borderRadius: '4px',
-                border: '1px solid #bdc3c7',
-                fontSize: '16px'
-              }}
-            />
-          </div>
+          <TimeInput label="Hours" value={hours} onChange={setHours} />
+          <TimeInput label="Minutes" value={minutes} onChange={setMinutes} max="59" />
+          <TimeInput label="Seconds" value={seconds} onChange={setSeconds} max="59" />
+          
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -371,42 +397,7 @@ function App() {
               width: '100%',
               padding: '10px 0'
             }}>
-              <table className="speeds-table" style={{
-                width: '100%',
-                margin: '10px auto',
-                borderCollapse: 'collapse',
-                backgroundColor: '#fff',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                minWidth: '280px'
-              }}>
-                <thead>
-                  <tr style={{backgroundColor: '#34495e', color: 'white'}}>
-                    <th style={{padding: '12px', fontSize: '14px'}}>Alternative paces</th>
-                    <th style={{padding: '12px', fontSize: '14px'}}>Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {unit === 'km' ? (
-                    <tr style={{borderBottom: '1px solid #ecf0f1'}}>
-                      <td style={{padding: '12px', fontSize: '14px'}}>Minutes per Mile</td>
-                      <td style={{padding: '12px', fontSize: '14px'}}>{speeds.minPerMile}/mile</td>
-                    </tr>
-                  ) : (
-                    <tr style={{borderBottom: '1px solid #ecf0f1'}}>
-                      <td style={{padding: '12px', fontSize: '14px'}}>Minutes per Kilometer</td>
-                      <td style={{padding: '12px', fontSize: '14px'}}>{speeds.minPerKm}/km</td>
-                    </tr>
-                  )}
-                  <tr style={{borderBottom: '1px solid #ecf0f1'}}>
-                    <td style={{padding: '12px', fontSize: '14px'}}>Miles per Hour</td>
-                    <td style={{padding: '12px', fontSize: '14px'}}>{speeds.mph} mph</td>
-                  </tr>
-                  <tr>
-                    <td style={{padding: '12px', fontSize: '14px'}}>Kilometers per Hour</td>
-                    <td style={{padding: '12px', fontSize: '14px'}}>{speeds.kph} km/h</td>
-                  </tr>
-                </tbody>
-              </table>
+              <SpeedTable unit={unit} speeds={speeds} />
             </div>
 
             {splits && (
@@ -443,46 +434,15 @@ function App() {
                     overflowY: 'auto',
                     padding: '10px'
                   }}>
-                    {splits.map((split, index) => {
-                      const barWidth = `${(split.seconds / Math.max(...splits.map(s => s.seconds))) * 100}%`;
-                      return (
-                        <div key={index} style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '10px',
-                          padding: '8px',
-                          backgroundColor: 'white',
-                          borderRadius: '4px',
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                        }}>
-                          <div style={{
-                            minWidth: '120px',
-                            fontSize: '14px',
-                            color: '#666'
-                          }}>{unit === 'km' ? `Kilometer ${index + 1}` : `Mile ${index + 1}`}</div>
-                          <div style={{
-                            flex: 1,
-                            height: '24px',
-                            backgroundColor: '#f0f0f0',
-                            borderRadius: '4px',
-                            overflow: 'hidden'
-                          }}>
-                            <div style={{
-                              width: barWidth,
-                              height: '100%',
-                              backgroundColor: index < splits.length/2 ? '#3498db' : '#2ecc71',
-                              transition: 'width 0.3s ease'
-                            }}></div>
-                          </div>
-                          <div style={{
-                            minWidth: '70px',
-                            fontSize: '14px',
-                            fontWeight: 'bold',
-                            textAlign: 'right'
-                          }}>{split.split}</div>
-                        </div>
-                      );
-                    })}
+                    {splits.map((split, index) => (
+                      <SplitRow 
+                        key={index}
+                        index={index}
+                        split={split}
+                        unit={unit}
+                        totalSplits={splits}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
