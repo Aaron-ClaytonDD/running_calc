@@ -100,7 +100,7 @@ function App() {
           letterSpacing: '2px',
           textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
         }}>
-          🏃 Race Pace Calculator 🏃‍♀️
+          🏃 Race Pace Calculator! 🏃‍♀️
         </h1>
       </div>
       
