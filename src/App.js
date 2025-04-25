@@ -1,5 +1,7 @@
 import './App.css';
 import React from 'react';
+import OpenAI from "openai";
+
 
 import { datadogRum } from '@datadog/browser-rum';
 
@@ -18,7 +20,56 @@ datadogRum.init({
     defaultPrivacyLevel: 'allow',
 });
 
+const client = new OpenAI();
 
+const TextGenerator = () => {
+  const [prompt, setPrompt] = React.useState("");
+  const [generatedText, setGeneratedText] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const generateText = async () => {
+    try {
+      setIsLoading(true);
+      const response = await client.responses.create({
+        model: "gpt-4.1",
+        input: prompt,
+      });
+      setGeneratedText(response.text);
+    } catch (error) {
+      console.error("Error generating text:", error);
+      setGeneratedText("An error occurred while generating text.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ margin: '20px', padding: '20px', border: '1px solid #ccc', borderRadius: '5px' }}>
+      <textarea
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        placeholder="Enter your prompt here..."
+        style={{ width: '100%', minHeight: '100px', marginBottom: '10px', padding: '8px' }}
+      />
+      <button 
+        onClick={generateText}
+        disabled={isLoading}
+        style={{ padding: '8px 16px', marginBottom: '10px' }}
+      >
+        {isLoading ? 'Generating...' : 'Generate Text'}
+      </button>
+      <div style={{ 
+        marginTop: '20px',
+        padding: '10px',
+        backgroundColor: '#f5f5f5',
+        borderRadius: '5px',
+        minHeight: '100px'
+      }}>
+        {generatedText || 'Generated text will appear here...'}
+      </div>
+    </div>
+  );
+};
 
 // Constants
 const DISTANCES = {
